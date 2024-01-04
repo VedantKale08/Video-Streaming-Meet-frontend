@@ -1,9 +1,9 @@
-import Image from 'next/image'
+import Lobby from '@/components/Lobby'
 
 export default function Home() {
   return (
     <div>
-      Hello
+      <Lobby/>
     </div>
   )
 }
