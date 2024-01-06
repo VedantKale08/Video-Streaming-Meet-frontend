@@ -28,10 +28,23 @@ const Room = () => {
     openMyStream();
   }, []);
 
+  useEffect(() => {
+    if (!myStream || !myId) {
+      return;
+    }
+    setPlayers((prev) => ({
+      ...prev,
+      [myId]: {
+        url: myStream,
+        muted: true,
+        playing: true,
+      },
+    }));
+  }, [myStream, myId, setPlayers]);
+
   const handleUserConnected = (newUser) => {
     console.log(`User connected in room with userId ${newUser}`);
     var call = peer.call(newUser, myStream);
-
     call.on("stream", (incomingStream) => {
       console.log(`Incoming stream from ${newUser}`);
       setPlayers((prev) => ({
@@ -50,11 +63,12 @@ const Room = () => {
     return () => {
       socket.off("user-connected", handleUserConnected);
     };
-  }, [peer, socket, myStream, handleUserConnected]);
+  }, [myStream, handleUserConnected]);
 
-  useEffect(() => {
+  const answerCall = () => {
     peer.on("call", (call) => {
       const { peer: callerId } = call;
+
       call.answer(myStream);
 
       call.on("stream", (incomingStream) => {
@@ -69,21 +83,11 @@ const Room = () => {
         }));
       });
     });
-  }, [peer, myStream]);
+  };
 
   useEffect(() => {
-    if (!myStream || !myId) {
-      return;
-    }
-    setPlayers((prev) => ({
-      ...prev,
-      [myId]: {
-        url: myStream,
-        muted: true,
-        playing: true,
-      },
-    }));
-  }, [myStream, myId, setPlayers]);
+    answerCall();
+  }, [myStream]);
 
   return (
     <div className="bg-[#eee] h-screen flex justify-center items-center">
