@@ -1,5 +1,5 @@
 import React from "react";
-import { Mic, Video, PhoneOff, MicOff, VideoOff } from "lucide-react";
+import { Mic, Video, PhoneOff, MicOff, VideoOff, Users } from "lucide-react";
 import usePlayer from "@/hooks/usePlayer";
 
 const BottomControl = ({
@@ -8,11 +8,13 @@ const BottomControl = ({
   toggleAudio = () => void 0,
   toggleVideo = () => void 0,
   leaveRoom = () => void 0,
+  setShow = () => void 0,
+  show,
 }) => {
   return (
     <div className="flex gap-8 fixed bottom-20">
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer ${
+        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer  hover:bg-[#ff6452] transition duration-150 ${
           muted && "bg-[#ff6452]"
         }`}
         onClick={toggleAudio}
@@ -20,7 +22,7 @@ const BottomControl = ({
         {muted ? <MicOff /> : <Mic />}
       </button>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer ${
+        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer  hover:bg-[#ff6452] transition duration-150 ${
           !playing && "bg-[#ff6452]"
         }`}
         onClick={toggleVideo}
@@ -28,10 +30,16 @@ const BottomControl = ({
         {playing ? <Video /> : <VideoOff />}
       </button>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer`}
+        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer hover:bg-[red] transition duration-150 `}
         onClick={leaveRoom}
       >
         <PhoneOff />
+      </button>
+      <button
+        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer hover:bg-[#ff6452] transition duration-150 `}
+        onClick={() => setShow(!show)}
+      >
+        <Users />
       </button>
     </div>
   );

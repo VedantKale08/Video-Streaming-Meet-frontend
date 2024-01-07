@@ -9,6 +9,8 @@ import BottomControl from "./BottomControl";
 import { cloneDeep, isEmpty } from "lodash";
 import { MicOff, VideoOff } from "lucide-react";
 import CopySection from "./CopySection";
+import { getName } from "@/store/userStore";
+import UserSideBar from "./UserSideBar";
 
 const Room = () => {
   const [myPeer, setMyPeer] = useState(null);
@@ -18,7 +20,9 @@ const Room = () => {
   const socket = useSocket();
   const { players, setPlayers, toggleAudio, toggleVideo, leaveRoom } =
     usePlayer(myPeer, peerIns);
-  const [users,setUser] = useState([]);
+  const [users, setUser] = useState([]);
+  const name = getName((state) => state.name);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     const initPeer = () => {
@@ -26,7 +30,7 @@ const Room = () => {
       peer.on("open", (id) => {
         console.log("Your peer id is " + id);
         setMyPeer(id);
-        socket.emit("join-room", roomId, id);
+        socket.emit("join-room", roomId, id, name);
       });
 
       peer.on("call", (call) => {
@@ -40,10 +44,12 @@ const Room = () => {
                 url: stream,
                 playing: true,
                 muted: true,
+                name: name,
               },
             }));
             call.answer(stream);
             call.on("stream", (incomingStream) => {
+              const userName = call.metadata.name;
               console.log("Incoming Stream: ", incomingStream);
               setPlayers((prev) => ({
                 ...prev,
@@ -51,11 +57,12 @@ const Room = () => {
                   url: incomingStream,
                   playing: true,
                   muted: true,
+                  name: userName,
                 },
               }));
-              setUser((prev)=>({
+              setUser((prev) => ({
                 ...prev,
-                [call.peer]:call
+                [call.peer]: call,
               }));
             });
           })
@@ -71,8 +78,8 @@ const Room = () => {
       return peer;
     };
 
-    const connectToNewUser = (userId, stream, peer) => {
-      const call = peer.call(userId, stream);
+    const connectToNewUser = (userId, stream, peer, userName) => {
+      const call = peer.call(userId, stream, { metadata: { name: name } });
 
       if (call) {
         call.on("stream", (incomingStream) => {
@@ -83,6 +90,7 @@ const Room = () => {
               url: incomingStream,
               playing: true,
               muted: true,
+              name: userName,
             },
           }));
           setUser((prev) => ({
@@ -108,10 +116,11 @@ const Room = () => {
             url: stream,
             playing: true,
             muted: true,
+            name: name,
           },
         }));
-        socket.on("user-connected", (userId) => {
-          connectToNewUser(userId, stream, peerInstance);
+        socket.on("user-connected", (userId, userName) => {
+          connectToNewUser(userId, stream, peerInstance, userName);
         });
       })
       .catch((err) =>
@@ -149,7 +158,7 @@ const Room = () => {
         const { [userId]: _, ...newPlayers } = prevPlayers;
         return newPlayers;
       });
-    }
+    };
 
     socket.on("user-toggle-audio", handleToggleAudio);
     socket.on("user-toggle-video", handleToggleVideo);
@@ -169,7 +178,7 @@ const Room = () => {
       <div className="rounded-md p-5 pb-9 flex flex-col items-center gap-3">
         <div className={`grid ${gridColumns} gap-6 grid-flow-col transition `}>
           {Object.keys(players).map((playerId) => {
-            const { url, playing, muted } = players[playerId];
+            const { url, playing, muted, name } = players[playerId];
             return (
               <div className="relative">
                 <ReactPlayer
@@ -185,11 +194,15 @@ const Room = () => {
                 <div className="absolute top-3 left-4">
                   {!playing && <VideoOff size={19} className="text-white" />}
                 </div>
+                <div className="absolute bottom-3 right-4">
+                  {name && <p className="text-white text-sm">{name}</p>}
+                </div>
               </div>
             );
           })}
         </div>
-        <CopySection/>
+        <CopySection />
+        {show && <UserSideBar players={players} setShow={setShow} />}
         {!isEmpty(players) && (
           <BottomControl
             playing={players[null].playing}
@@ -197,6 +210,8 @@ const Room = () => {
             toggleAudio={toggleAudio}
             toggleVideo={toggleVideo}
             leaveRoom={leaveRoom}
+            setShow={setShow}
+            show={show}
           />
         )}
       </div>
