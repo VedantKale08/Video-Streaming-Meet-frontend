@@ -2,7 +2,7 @@ import { useSocket } from "@/context/SocketProvider";
 import { cloneDeep } from "lodash";
 import { useParams, useRouter } from "next/navigation";
 
-const { useState } = require("react")
+const { useState } = require("react");
 
 const usePlayer = (myPeer, peerIns) => {
   const socket = useSocket();
@@ -13,7 +13,7 @@ const usePlayer = (myPeer, peerIns) => {
   const leaveRoom = () => {
     socket.emit("user-leave", myPeer, roomId);
     peerIns.disconnect();
-    router.push('/');
+    router.push("/");
   };
 
   const toggleAudio = () => {
