@@ -175,77 +175,6 @@ const Room = () => {
     };
   }, []);
 
-  // Function to start or stop screen sharing
-  const toggleScreenShare = () => {
-    if (isScreenSharing) {
-      stopScreenSharing();
-    } else {
-      startScreenSharing();
-    }
-  };
-
-  console.log(players);
-
-  const startScreenSharing = () => {
-    navigator.mediaDevices
-      .getDisplayMedia({ video: { cursor: "always" } })
-      .then((stream) => {
-        setScreenStream(stream);
-        // Update the peer connection to share the screen stream
-        if (peerIns) {
-          const videoTrack = stream.getVideoTracks()[0];
-          const sender = peerCall.peerConnection
-            .getSenders()
-            .find((s) => s.track.kind === videoTrack.kind);
-
-          if (sender) {
-            sender.replaceTrack(videoTrack);
-            setPlayers((prev) => ({
-              ...prev,
-              [null]: {
-                url: stream,
-                playing: true,
-                muted: true,
-                name: name,
-              },
-            }));
-            setScreenSharing(true);
-          }
-        }
-
-        // Handle screen stream end event
-        stream.getVideoTracks()[0].onended = () => {
-          stopScreenSharing();
-        };
-      })
-      .catch((error) => {
-        console.error("Error starting screen sharing:", error);
-      });
-  };
-
-  const stopScreenSharing = () => {
-    // Revert to the original video stream
-    setScreenSharing(false);
-    const videoTrack = myStream.getVideoTracks()[0];
-    const sender = peerCall.peerConnection
-      .getSenders()
-      .find((s) => s.track.kind === videoTrack.kind);
-
-    if (sender) {
-      sender.replaceTrack(videoTrack);
-      setPlayers((prev) => ({
-        ...prev,
-        [null]: {
-          url: myStream,
-          playing: true,
-          muted: true,
-          name: name,
-        },
-      }));
-      setScreenStream(null);
-    }
-  };
-
   const numberOfVideos = Object.keys(players).length;
   const gridColumns = `md:repeat(${Math.min(numberOfVideos, 3)}, 1fr)`;
 
@@ -289,7 +218,7 @@ const Room = () => {
             leaveRoom={leaveRoom}
             setShow={setShow}
             show={show}
-            toggleScreenShare={toggleScreenShare}
+            // toggleScreenShare={toggleScreenShare}
           />
         )}
       </div>
