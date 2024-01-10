@@ -176,12 +176,20 @@ const Room = () => {
   }, []);
 
   const numberOfVideos = Object.keys(players).length;
-  const gridColumns = `md:repeat(${Math.min(numberOfVideos, 3)}, 1fr)`;
+  const gridColumns = `grid-cols-${Math.min(numberOfVideos, 3)}`;
 
   return (
     <div className="h-screen flex justify-center items-center">
       <div className="rounded-md p-5 pb-9 flex flex-col items-center gap-3">
-        <div className={`grid ${gridColumns} gap-6 grid-flow-col transition `}>
+        <div
+          className={`grid gap-6 transition`}
+          style={{
+            gridTemplateColumns: `repeat(${Math.min(
+              numberOfVideos,
+              3
+            )}, minmax(0, 1fr))`,
+          }}
+        >
           {Object.keys(players).map((playerId) => {
             const { url, playing, muted, name } = players[playerId];
             return (
@@ -191,6 +199,8 @@ const Room = () => {
                   url={playing && url}
                   playing={playing}
                   muted={muted}
+                  width={800 / (Math.min(numberOfVideos, 3) / 1.5)}
+                  height={500 / (Math.min(numberOfVideos, 3) / 1.5)}
                   style={{ borderRadius: "2%", border: "1px solid #ff6452" }}
                 />
                 <div className="absolute top-3 right-4">

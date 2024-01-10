@@ -14,7 +14,7 @@ const BottomControl = ({
   show,
 }) => {
   return (
-    <div className="flex gap-8 fixed bottom-20">
+    <div className="flex gap-8 fixed bottom-10">
       <button
         className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer  hover:bg-[#ff6452] transition duration-150 ${
           muted && "bg-[#ff6452]"
