@@ -1,6 +1,17 @@
 import React from "react";
-import { Mic, Video, PhoneOff, MicOff, VideoOff, Users, MonitorUp } from "lucide-react";
-import usePlayer from "@/hooks/usePlayer";
+import {
+  Mic,
+  Video,
+  PhoneOff,
+  MicOff,
+  VideoOff,
+  Users,
+  MonitorUp,
+  Copy,
+} from "lucide-react";
+import { twMerge } from "tailwind-merge";
+import { useParams } from "next/navigation";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 const BottomControl = ({
   muted,
@@ -14,40 +25,54 @@ const BottomControl = ({
   show,
 }) => {
   return (
-    <div className="flex gap-8 fixed bottom-10">
+    <div className="flex relative gap-8 justify-center z-50 bg-[#121B21] shadow-sm p-4 border border-gray-800">
+      <div className="absolute left-5 top-2 text-white text-sm">
+        <p>Room Code </p>
+        <CopyToClipboard text={useParams().id}>
+          <p className="flex gap-2 items-center p-2 bg-[#27303F] rounded-md cursor-pointer">
+            {useParams().id} <Copy size={15} />
+          </p>
+        </CopyToClipboard>
+      </div>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer  hover:bg-[#ff6452] transition duration-150 ${
-          muted && "bg-[#ff6452]"
-        }`}
+        className={twMerge(
+          `bg-[#27303F] text-white border border-gray-600 rounded-lg px-5 py-3 cursor-pointer  hover:bg-blue-500 hover:text-white transition duration-150 ${
+            muted && "bg-blue-500 text-white "
+          }`
+        )}
         onClick={toggleAudio}
       >
-        {muted ? <MicOff /> : <Mic />}
+        {muted ? <MicOff size={17} /> : <Mic size={17} />}
       </button>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer  hover:bg-[#ff6452] transition duration-150 ${
-          !playing && "bg-[#ff6452]"
-        }`}
+        className={twMerge(
+          `bg-[#27303F] text-white border border-gray-600 rounded-lg px-5 py-3 cursor-pointer  hover:bg-blue-500 hover:text-white transition duration-150 ${
+            !playing && "bg-blue-500 text-white"
+          }`
+        )}
         onClick={toggleVideo}
       >
-        {playing ? <Video /> : <VideoOff />}
+        {playing ? <Video size={17} /> : <VideoOff size={17} />}
       </button>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer hover:bg-[#ff6452] transition duration-150 ${isScreenSharing && "bg-[#ff6452]"}`}
+        className={`bg-[#27303F] text-white border border-gray-600 rounded-lg px-5 py-3 cursor-pointer hover:bg-blue-500 hover:text-white transition duration-150 ${
+          isScreenSharing && "bg-blue-500 text-white"
+        }`}
         onClick={toggleScreenShare}
       >
-        <MonitorUp />
+        <MonitorUp size={17} />
       </button>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer hover:bg-[red] transition duration-150 `}
+        className={`bg-red-500 text-white border border-gray-600 rounded-lg px-5 py-3 cursor-pointer hover:bg-[red] hover:text-white transition duration-150 `}
         onClick={leaveRoom}
       >
-        <PhoneOff />
+        <PhoneOff size={17} />
       </button>
       <button
-        className={`text-white bg-[#1e293b] rounded-full p-4 cursor-pointer hover:bg-[#ff6452] transition duration-150 `}
+        className={`bg-[#27303F] text-white border border-gray-600 rounded-lg px-5 py-3 cursor-pointer hover:bg-blue-500 hover:text-white transition duration-150 `}
         onClick={() => setShow(!show)}
       >
-        <Users />
+        <Users size={17} />
       </button>
     </div>
   );

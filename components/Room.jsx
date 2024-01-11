@@ -8,9 +8,10 @@ import usePlayer from "@/hooks/usePlayer";
 import BottomControl from "./BottomControl";
 import { cloneDeep, isEmpty } from "lodash";
 import { MicOff, VideoOff } from "lucide-react";
-import CopySection from "./CopySection";
 import { getName } from "@/store/userStore";
 import UserSideBar from "./UserSideBar";
+import VideoComponent from "./VideoComponent";
+import MeetHeader from "./MeetHeader";
 
 const Room = () => {
   const [myPeer, setMyPeer] = useState(null);
@@ -26,6 +27,7 @@ const Room = () => {
   const [peerCall, setPeerCall] = useState(null);
   const [screenStream, setScreenStream] = useState(null);
   const [isScreenSharing, setScreenSharing] = useState(false);
+  const [time, setTime] = useState(0);
 
   useEffect(() => {
     const initPeer = () => {
@@ -54,6 +56,8 @@ const Room = () => {
             setPeerCall(call);
             call.on("stream", (incomingStream) => {
               const userName = call.metadata.name;
+              const nTime = call.metadata.time;
+              setTime(nTime);
               console.log("Incoming Stream: ", incomingStream);
               setPlayers((prev) => ({
                 ...prev,
@@ -83,7 +87,9 @@ const Room = () => {
     };
 
     const connectToNewUser = (userId, stream, peer, userName) => {
-      const call = peer.call(userId, stream, { metadata: { name: name } });
+      const call = peer.call(userId, stream, {
+        metadata: { name: name, time: time },
+      });
 
       if (call) {
         setPeerCall(call);
@@ -175,63 +181,45 @@ const Room = () => {
     };
   }, []);
 
-  const numberOfVideos = Object.keys(players).length;
-  const gridColumns = `grid-cols-${Math.min(numberOfVideos, 3)}`;
+  useEffect(() => {
+    setTimeout(() => {
+      setTime(time + 1);
+    }, 1000);
+  }, [time]);
+
+  const toTime = (seconds) => {
+    var date = new Date(null);
+    date.setSeconds(seconds);
+    return date.toISOString().substr(11, 8);
+  };
 
   return (
-    <div className="h-screen flex justify-center items-center">
-      <div className="rounded-md p-5 pb-9 flex flex-col items-center gap-3">
-        <div
-          className={`grid gap-6 transition`}
-          style={{
-            gridTemplateColumns: `repeat(${Math.min(
-              numberOfVideos,
-              3
-            )}, minmax(0, 1fr))`,
-          }}
-        >
-          {Object.keys(players).map((playerId) => {
-            const { url, playing, muted, name } = players[playerId];
-            return (
-              <div className="relative">
-                <ReactPlayer
-                  key={playerId}
-                  url={playing && url}
-                  playing={playing}
-                  muted={muted}
-                  width={800 / (Math.min(numberOfVideos, 3) / 1.5)}
-                  height={500 / (Math.min(numberOfVideos, 3) / 1.5)}
-                  style={{ borderRadius: "2%", border: "1px solid #ff6452" }}
-                />
-                <div className="absolute top-3 right-4">
-                  {muted && <MicOff size={19} className="text-white" />}
-                </div>
-                <div className="absolute top-3 left-4">
-                  {!playing && <VideoOff size={19} className="text-white" />}
-                </div>
-                <div className="absolute bottom-3 right-4">
-                  {name && <p className="text-white text-sm">{name}</p>}
-                </div>
-              </div>
-            );
-          })}
+    <div className="h-screen flex w-full bg-[#101825] overflow-hidden">
+      <div className="flex-1">
+        {/* Header */}
+        <MeetHeader time={time} toTime={toTime} />
+
+        <div className="rounded-md flex flex-col gap-3 h-[calc(100vh-68px)]">
+          {/* Video Component */}
+          <VideoComponent players={players} />
+
+          {/* BottomControl */}
+          {!isEmpty(players) && (
+            <BottomControl
+              playing={players[null].playing}
+              muted={players[null].muted}
+              toggleAudio={toggleAudio}
+              toggleVideo={toggleVideo}
+              leaveRoom={leaveRoom}
+              setShow={setShow}
+              show={show}
+            />
+          )}
         </div>
-        <CopySection />
-        {show && <UserSideBar players={players} setShow={setShow} />}
-        {!isEmpty(players) && (
-          <BottomControl
-            playing={players[null].playing}
-            muted={players[null].muted}
-            isScreenSharing={isScreenSharing}
-            toggleAudio={toggleAudio}
-            toggleVideo={toggleVideo}
-            leaveRoom={leaveRoom}
-            setShow={setShow}
-            show={show}
-            // toggleScreenShare={toggleScreenShare}
-          />
-        )}
       </div>
+
+      {/* Sidebar */}
+      <UserSideBar players={players} setShow={setShow} show={show} />
     </div>
   );
 };
