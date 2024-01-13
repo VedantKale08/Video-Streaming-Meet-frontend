@@ -21,7 +21,7 @@ const BottomControl = ({
   toggleVideo = () => void 0,
   leaveRoom = () => void 0,
   setShow = () => void 0,
-  toggleScreenShare = () => void 0,
+  toggleScreenSharing = () => void 0,
   show,
 }) => {
   return (
@@ -58,7 +58,7 @@ const BottomControl = ({
         className={`bg-[#27303F] text-white border border-gray-600 rounded-lg px-5 py-3 cursor-pointer hover:bg-blue-500 hover:text-white transition duration-150 ${
           isScreenSharing && "bg-blue-500 text-white"
         }`}
-        onClick={toggleScreenShare}
+        onClick={toggleScreenSharing}
       >
         <MonitorUp size={17} />
       </button>

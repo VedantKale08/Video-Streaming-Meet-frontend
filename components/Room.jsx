@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Peer from "peerjs";
 import { useParams } from "next/navigation";
 import { useSocket } from "@/context/SocketProvider";
@@ -25,13 +25,17 @@ const Room = () => {
   const name = getName((state) => state.name);
   const [show, setShow] = useState(false);
   const [peerCall, setPeerCall] = useState(null);
-  const [screenStream, setScreenStream] = useState(null);
   const [isScreenSharing, setScreenSharing] = useState(false);
+  const [screenStream, setScreenStream] = useState(null);
   const [time, setTime] = useState(0);
 
   useEffect(() => {
     const initPeer = () => {
-      const peer = new Peer();
+      const peer = new Peer(undefined, {
+        config: {
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        },
+      });
       peer.on("open", (id) => {
         console.log("Your peer id is " + id);
         setMyPeer(id);
@@ -171,13 +175,20 @@ const Room = () => {
       });
     };
 
+    const handleScreenShare = (userId, stream) => {
+      console.log(stream);
+      setScreenStream(stream);
+    };
+
     socket.on("user-toggle-audio", handleToggleAudio);
     socket.on("user-toggle-video", handleToggleVideo);
     socket.on("user-leave", handleUserLeave);
+    socket.on("user-toggle-screen-share", handleScreenShare);
     return () => {
       socket.off("user-toggle-audio", handleToggleAudio);
       socket.off("user-toggle-video", handleToggleVideo);
       socket.off("user-leave", handleUserLeave);
+      socket.off("user-toggle-screen-share", handleScreenShare);
     };
   }, []);
 
@@ -193,6 +204,49 @@ const Room = () => {
     return date.toISOString().substr(11, 8);
   };
 
+  const startScreenSharing = () => {
+    try {
+      navigator.mediaDevices
+        .getDisplayMedia({
+          video: { cursor: "always" },
+        })
+        .then((stream) => {
+          socket.emit(
+            "user-toggle-screen-share",
+            myPeer,
+            roomId,
+            stream
+          );
+          console.log(stream);
+          setScreenStream(stream);
+          setScreenSharing(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (error) {
+      console.error("Error while accessing video stream: ", error);
+    }
+  };
+
+  const stopScreenSharing = () => {
+    try {
+      const tracks = screenStream.getTracks();
+      tracks.forEach((t) => t.stop());
+      setScreenStream(null);
+      setScreenSharing(false);
+      socket.emit("user-toggle-screen-share", myPeer, roomId, null);
+    } catch (error) {}
+  };
+
+  const toggleScreenSharing = () => {
+    if (isScreenSharing) {
+      stopScreenSharing();
+    } else {
+      startScreenSharing();
+    }
+  };
+
   return (
     <div className="h-screen flex w-full bg-[#101825] overflow-hidden">
       <div className="flex-1">
@@ -201,7 +255,11 @@ const Room = () => {
 
         <div className="rounded-md flex flex-col gap-3 h-[calc(100vh-68px)]">
           {/* Video Component */}
-          <VideoComponent players={players} />
+          <VideoComponent
+            players={players}
+            screenStream={screenStream}
+            isScreenSharing={isScreenSharing}
+          />
 
           {/* BottomControl */}
           {!isEmpty(players) && (
@@ -213,6 +271,8 @@ const Room = () => {
               leaveRoom={leaveRoom}
               setShow={setShow}
               show={show}
+              isScreenSharing={isScreenSharing}
+              toggleScreenSharing={toggleScreenSharing}
             />
           )}
         </div>
