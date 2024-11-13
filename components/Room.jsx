@@ -279,7 +279,12 @@ const Room = () => {
       </div>
 
       {/* Sidebar */}
-      <UserSideBar players={players} setShow={setShow} show={show} />
+      <UserSideBar
+        players={players}
+        setShow={setShow}
+        show={show}
+        myPeer={myPeer}
+      />
     </div>
   );
 };

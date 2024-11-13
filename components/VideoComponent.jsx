@@ -18,6 +18,8 @@ const VideoComponent = ({ players, screenStream, isScreenSharing }) => {
         }`,
       }}
     >
+      
+      {/* {console.log(screenStream)} */}
       {screenStream && (
         <div className="screen w-full h-full grid place-items-center">
           <ReactPlayer
