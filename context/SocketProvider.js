@@ -13,7 +13,10 @@ export const SocketProvider = (props) => {
     const {children} = props;
     const [socket,setSocket] = useState(null)
     useEffect(()=>{
-        const connection = io("http://localhost:5000");
+        // const connection = io("http://localhost:5000");
+        const connection = io(
+          "https://video-streaming-meet-backend.onrender.com"
+        );
         setSocket(connection);
     },[])
     return (
