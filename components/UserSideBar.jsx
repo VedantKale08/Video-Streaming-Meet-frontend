@@ -48,35 +48,37 @@ const UserSideBar = ({ players, setShow, show, myPeer }) => {
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className={`bg-[#17202F] text-white h-screen w-[20%] shadow-md md:block border border-gray-800 ${
+      className={`bg-[#17202F] text-white h-screen w-[20%] flex flex-col justify-between shadow-md md:block border border-gray-800 ${
         !show ? "hidden" : "block"
       }`}
     >
-      <div className="flex gap-3 p-4">
-        <div
-          onClick={() => setView("users")}
-          className={twMerge(
-            `flex-1 cursor-pointer flex justify-center items-center gap-2 text-center bg-[#27303F] rounded-lg py-2 text-sm ${
-              view === "users" ? "bg-blue-500 text-white" : ""
-            }`
-          )}
-        >
-          <Users size={15} />
-          People
+      <div>
+        <div className="flex gap-3 p-4">
+          <div
+            onClick={() => setView("users")}
+            className={twMerge(
+              `flex-1 cursor-pointer flex justify-center items-center gap-2 text-center bg-[#27303F] rounded-lg py-2 text-sm ${
+                view === "users" ? "bg-blue-500 text-white" : ""
+              }`
+            )}
+          >
+            <Users size={15} />
+            People
+          </div>
+          <div
+            onClick={() => setView("chat")}
+            className={twMerge(
+              `flex-1 cursor-pointer flex justify-center items-center gap-2 text-center bg-[#27303F] rounded-lg py-2 text-sm ${
+                view === "chat" ? "bg-blue-500 text-white" : ""
+              }`
+            )}
+          >
+            <MessageCircleMore size={15} />
+            Chats
+          </div>
         </div>
-        <div
-          onClick={() => setView("chat")}
-          className={twMerge(
-            `flex-1 cursor-pointer flex justify-center items-center gap-2 text-center bg-[#27303F] rounded-lg py-2 text-sm ${
-              view === "chat" ? "bg-blue-500 text-white" : ""
-            }`
-          )}
-        >
-          <MessageCircleMore size={15} />
-          Chats
-        </div>
+        <hr className="border-gray-800 mb-6" />
       </div>
-      <hr className="border-gray-800 mb-6" />
       {view === "users" ? (
         <div className="px-5">
           <div className="flex gap-7 items-center">
@@ -112,7 +114,7 @@ const UserSideBar = ({ players, setShow, show, myPeer }) => {
           </div>
         </div>
       ) : (
-        <div className="px-5 flex flex-col">
+        <div className="px-5 flex flex-col pb-5">
           <div className="flex-1 overflow-y-auto">
             {chatMessages.map((msg, index) => (
               <div
